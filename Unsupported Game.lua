@@ -5,13 +5,13 @@ local CoreGui = game:GetService("CoreGui")
 
 local Settings = {
     Name = "TiRex Hub",
-    Accent = Color3.fromRGB(160, 60, 255), -- Electric Purple
-    Background = Color3.fromRGB(10, 10, 12),
-    Header = Color3.fromRGB(15, 15, 18),
-    Sidebar = Color3.fromRGB(14, 14, 17),
-    Element = Color3.fromRGB(20, 20, 24),
-    Text = Color3.fromRGB(240, 240, 240),
-    TextDark = Color3.fromRGB(140, 140, 150)
+    Accent = Color3.fromRGB(255, 115, 0),
+    Background = Color3.fromRGB(25, 18, 15),
+    Header = Color3.fromRGB(35, 25, 20),
+    Sidebar = Color3.fromRGB(30, 22, 18),
+    Element = Color3.fromRGB(45, 32, 25),
+    Text = Color3.fromRGB(255, 248, 240),
+    TextDark = Color3.fromRGB(170, 150, 140)
 }
 
 local function Tween(obj, props, time, style, dir)
@@ -19,7 +19,6 @@ local function Tween(obj, props, time, style, dir)
 end
 
 function TiRex:Window(name)
-    -- Cleanup Old Instances
     local function Clear(parent)
         for _, v in pairs(parent:GetChildren()) do
             if v.Name == "TiRex_Refined" then v:Destroy() end
@@ -46,12 +45,10 @@ function TiRex:Window(name)
     local MenuIcon = Instance.new("Frame")
     local MenuList = Instance.new("UIListLayout")
     
-    --// MINI TOGGLE (The "T" Button) //--
     local MiniToggle = Instance.new("TextButton")
     local MiniCorner = Instance.new("UICorner")
     local MiniStroke = Instance.new("UIStroke")
 
-    -- Parenting
     if syn and syn.protect_gui then
         syn.protect_gui(ScreenGui)
         ScreenGui.Parent = CoreGui
@@ -64,11 +61,10 @@ function TiRex:Window(name)
     ScreenGui.Name = "TiRex_Refined"
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-    -- Main Properties
     Main.Name = "Main"
     Main.Parent = ScreenGui
     Main.BackgroundColor3 = Settings.Background
-    Main.BackgroundTransparency = 0.1
+    Main.BackgroundTransparency = 0.05
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
     Main.Position = UDim2.new(0.5, 0, 0.5, 0)
     Main.Size = UDim2.new(0, 0, 0, 0)
@@ -79,9 +75,9 @@ function TiRex:Window(name)
     MainCorner.Parent = Main
 
     MainStroke.Parent = Main
-    MainStroke.Color = Color3.fromRGB(40, 40, 50)
+    MainStroke.Color = Color3.fromRGB(60, 45, 40)
     MainStroke.Thickness = 1
-    MainStroke.Transparency = 0.6
+    MainStroke.Transparency = 0.5
 
     Shadow.Name = "Shadow"
     Shadow.Parent = Main
@@ -91,25 +87,22 @@ function TiRex:Window(name)
     Shadow.Size = UDim2.new(1, 40, 1, 40)
     Shadow.ZIndex = 0
     Shadow.Image = "rbxassetid://6014261993"
-    Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-    Shadow.ImageTransparency = 0.5
+    Shadow.ImageColor3 = Color3.fromRGB(15, 10, 8)
+    Shadow.ImageTransparency = 0.4
     Shadow.ScaleType = Enum.ScaleType.Slice
     Shadow.SliceCenter = Rect.new(49, 49, 450, 450)
 
-    -- Header
     Header.Name = "Header"
     Header.Parent = Main
     Header.BackgroundColor3 = Settings.Header
-    Header.BackgroundTransparency = 0.05
+    Header.BackgroundTransparency = 0
     Header.Size = UDim2.new(1, 0, 0, 45)
     Header.ZIndex = 2
     Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 12)
 
-    -- Header Filler
     local HeaderFill = Instance.new("Frame")
     HeaderFill.Parent = Header
     HeaderFill.BackgroundColor3 = Settings.Header
-    HeaderFill.BackgroundTransparency = 0.05
     HeaderFill.BorderSizePixel = 0
     HeaderFill.Position = UDim2.new(0, 0, 1, -10)
     HeaderFill.Size = UDim2.new(1, 0, 0, 10)
@@ -172,11 +165,10 @@ function TiRex:Window(name)
         Main.Visible = false
     end)
 
-    -- Sidebar
     Sidebar.Name = "Sidebar"
     Sidebar.Parent = Main
     Sidebar.BackgroundColor3 = Settings.Sidebar
-    Sidebar.BackgroundTransparency = 0.05
+    Sidebar.BackgroundTransparency = 0
     Sidebar.Position = UDim2.new(0, 0, 0, 45)
     Sidebar.Size = UDim2.new(0, 160, 1, -45)
     Sidebar.ZIndex = 2
@@ -187,7 +179,6 @@ function TiRex:Window(name)
     local SidebarTopFill = Instance.new("Frame")
     SidebarTopFill.Parent = Sidebar
     SidebarTopFill.BackgroundColor3 = Settings.Sidebar
-    SidebarTopFill.BackgroundTransparency = 0.05
     SidebarTopFill.BorderSizePixel = 0
     SidebarTopFill.Size = UDim2.new(1, 0, 0, 10)
     SidebarTopFill.ZIndex = 2
@@ -195,7 +186,6 @@ function TiRex:Window(name)
     local SidebarRightFill = Instance.new("Frame")
     SidebarRightFill.Parent = Sidebar
     SidebarRightFill.BackgroundColor3 = Settings.Sidebar
-    SidebarRightFill.BackgroundTransparency = 0.05
     SidebarRightFill.BorderSizePixel = 0
     SidebarRightFill.Position = UDim2.new(1, -10, 0, 0)
     SidebarRightFill.Size = UDim2.new(0, 10, 1, 0)
@@ -219,28 +209,26 @@ function TiRex:Window(name)
     Container.Size = UDim2.new(1, -180, 1, -65)
     Container.ZIndex = 1
 
-    --// MINI TOGGLE SETUP //--
     MiniToggle.Parent = ScreenGui
-    MiniToggle.BackgroundColor3 = Settings.Header -- Dark Background
+    MiniToggle.BackgroundColor3 = Settings.Header
     MiniToggle.BackgroundTransparency = 0.1
     MiniToggle.Position = UDim2.new(0.5, -25, 0.05, 0)
     MiniToggle.Size = UDim2.new(0, 50, 0, 50)
     MiniToggle.AutoButtonColor = false
-    MiniToggle.Text = "T" -- The "T" Icon
+    MiniToggle.Text = "T"
     MiniToggle.Font = Enum.Font.GothamBold
     MiniToggle.TextSize = 32
-    MiniToggle.TextColor3 = Settings.Accent -- Purple Text
+    MiniToggle.TextColor3 = Settings.Accent
     MiniToggle.ZIndex = 10
     
     MiniCorner.CornerRadius = UDim.new(0, 10)
     MiniCorner.Parent = MiniToggle
     
     MiniStroke.Parent = MiniToggle
-    MiniStroke.Color = Settings.Accent -- Purple Border
+    MiniStroke.Color = Settings.Accent
     MiniStroke.Thickness = 2
     MiniStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-    -- Dragging Logic (Mobile & PC)
     local function MakeDraggable(object, dragObject)
         local Dragging = false
         local DragInput, DragStart, StartPosition
@@ -290,7 +278,6 @@ function TiRex:Window(name)
         end
     end)
 
-    -- Auto Open on Load
     Main.Visible = true
     Tween(Main, {Size = UDim2.new(0, 550, 0, 350)}, 0.6, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out)
 
@@ -407,17 +394,17 @@ function TiRex:Window(name)
             BtnCorner.CornerRadius = UDim.new(0, 8)
             BtnCorner.Parent = Btn
             BtnStroke.Parent = Btn
-            BtnStroke.Color = Color3.fromRGB(40, 40, 50)
+            BtnStroke.Color = Color3.fromRGB(60, 45, 40)
             BtnStroke.Thickness = 1
             BtnStroke.Transparency = 0.5
             
             Btn.MouseEnter:Connect(function()
-                Tween(Btn, {BackgroundColor3 = Color3.fromRGB(30, 30, 36)}, 0.2)
+                Tween(Btn, {BackgroundColor3 = Color3.fromRGB(55, 40, 35)}, 0.2)
                 Tween(BtnStroke, {Color = Settings.Accent}, 0.2)
             end)
             Btn.MouseLeave:Connect(function()
                 Tween(Btn, {BackgroundColor3 = Settings.Element}, 0.2)
-                Tween(BtnStroke, {Color = Color3.fromRGB(40, 40, 50)}, 0.2)
+                Tween(BtnStroke, {Color = Color3.fromRGB(60, 45, 40)}, 0.2)
             end)
             Btn.MouseButton1Click:Connect(function()
                 Tween(Btn, {TextSize = 12}, 0.1)
@@ -447,9 +434,10 @@ function TiRex:Window(name)
             TogCorner.CornerRadius = UDim.new(0, 8)
             TogCorner.Parent = TogBtn
             TogStroke.Parent = TogBtn
-            TogStroke.Color = Color3.fromRGB(40, 40, 50)
+            TogStroke.Color = Color3.fromRGB(60, 45, 40)
             TogStroke.Thickness = 1
             TogStroke.Transparency = 0.5
+            
             TogTitle.Parent = TogBtn
             TogTitle.BackgroundTransparency = 1
             TogTitle.Position = UDim2.new(0, 15, 0, 0)
@@ -459,12 +447,14 @@ function TiRex:Window(name)
             TogTitle.TextColor3 = Settings.Text
             TogTitle.TextSize = 14
             TogTitle.TextXAlignment = Enum.TextXAlignment.Left
+            
             Switch.Parent = TogBtn
-            Switch.BackgroundColor3 = Toggled and Settings.Accent or Color3.fromRGB(40, 40, 45)
+            Switch.BackgroundColor3 = Toggled and Settings.Accent or Color3.fromRGB(55, 40, 35)
             Switch.Position = UDim2.new(1, -50, 0.5, -10)
             Switch.Size = UDim2.new(0, 36, 0, 20)
             SwitchCorner.CornerRadius = UDim.new(1, 0)
             SwitchCorner.Parent = Switch
+            
             Dot.Parent = Switch
             Dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Dot.Position = Toggled and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
@@ -473,7 +463,7 @@ function TiRex:Window(name)
             DotCorner.Parent = Dot
 
             local function Update()
-                local targetColor = Toggled and Settings.Accent or Color3.fromRGB(40, 40, 45)
+                local targetColor = Toggled and Settings.Accent or Color3.fromRGB(55, 40, 35)
                 local targetPos = Toggled and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
                 Tween(Switch, {BackgroundColor3 = targetColor}, 0.2)
                 Tween(Dot, {Position = targetPos}, 0.2)
@@ -514,7 +504,7 @@ function TiRex:Window(name)
             SlideCorner.CornerRadius = UDim.new(0, 8)
             SlideCorner.Parent = SlideBtn
             SlideStroke.Parent = SlideBtn
-            SlideStroke.Color = Color3.fromRGB(40, 40, 50)
+            SlideStroke.Color = Color3.fromRGB(60, 45, 40)
             SlideStroke.Thickness = 1
             SlideStroke.Transparency = 0.5
             
@@ -539,7 +529,7 @@ function TiRex:Window(name)
             SlideVal.TextXAlignment = Enum.TextXAlignment.Right
             
             BarBg.Parent = SlideBtn
-            BarBg.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+            BarBg.BackgroundColor3 = Color3.fromRGB(55, 40, 35)
             BarBg.Position = UDim2.new(0, 15, 0, 32)
             BarBg.Size = UDim2.new(1, -30, 0, 6)
             Instance.new("UICorner", BarBg).CornerRadius = UDim.new(1, 0)
@@ -616,7 +606,7 @@ function TiRex:Window(name)
             BoxFrame.BackgroundTransparency = 0.2
             BoxFrame.Size = UDim2.new(1, -5, 0, 50)
             Instance.new("UICorner", BoxFrame).CornerRadius = UDim.new(0, 8)
-            Instance.new("UIStroke", BoxFrame).Color = Color3.fromRGB(40, 40, 50)
+            Instance.new("UIStroke", BoxFrame).Color = Color3.fromRGB(60, 45, 40)
             
             local Title = Instance.new("TextLabel", BoxFrame)
             Title.BackgroundTransparency = 1
@@ -629,7 +619,7 @@ function TiRex:Window(name)
             Title.TextXAlignment = Enum.TextXAlignment.Left
             
             BoxInput.Parent = BoxFrame
-            BoxInput.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+            BoxInput.BackgroundColor3 = Color3.fromRGB(55, 40, 35)
             BoxInput.Position = UDim2.new(0, 15, 0, 28)
             BoxInput.Size = UDim2.new(1, -30, 0, 18)
             BoxInput.Font = Enum.Font.Gotham
@@ -646,6 +636,7 @@ function TiRex:Window(name)
             local DropFrame = Instance.new("Frame")
             local DropBtn = Instance.new("TextButton")
             local DropScroll = Instance.new("ScrollingFrame")
+            local DropSelected = Instance.new("TextLabel", DropBtn)
             
             DropFrame.Parent = TabPage
             DropFrame.BackgroundColor3 = Settings.Element
@@ -654,13 +645,12 @@ function TiRex:Window(name)
             DropFrame.ClipsDescendants = true
             DropFrame.ZIndex = 20
             Instance.new("UICorner", DropFrame).CornerRadius = UDim.new(0, 8)
-            Instance.new("UIStroke", DropFrame).Color = Color3.fromRGB(40, 40, 50)
+            Instance.new("UIStroke", DropFrame).Color = Color3.fromRGB(60, 45, 40)
             
             DropBtn.Parent = DropFrame
             DropBtn.BackgroundTransparency = 1
             DropBtn.Size = UDim2.new(1, 0, 0, 42)
             DropBtn.Text = ""
-            DropBtn.ZIndex = 21
             
             local Title = Instance.new("TextLabel", DropBtn)
             Title.BackgroundTransparency = 1
@@ -671,40 +661,37 @@ function TiRex:Window(name)
             Title.TextColor3 = Settings.Text
             Title.TextSize = 14
             Title.TextXAlignment = Enum.TextXAlignment.Left
-            Title.ZIndex = 21
             
-            local Selected = Instance.new("TextLabel", DropBtn)
-            Selected.BackgroundTransparency = 1
-            Selected.Position = UDim2.new(1, -150, 0, 0)
-            Selected.Size = UDim2.new(0, 115, 1, 0)
-            Selected.Font = Enum.Font.Gotham
-            Selected.Text = "..."
-            Selected.TextColor3 = Settings.Accent
-            Selected.TextSize = 13
-            Selected.TextXAlignment = Enum.TextXAlignment.Right
-            Selected.ZIndex = 21
+            DropSelected.BackgroundTransparency = 1
+            DropSelected.Position = UDim2.new(1, -150, 0, 0)
+            DropSelected.Size = UDim2.new(0, 115, 1, 0)
+            DropSelected.Font = Enum.Font.Gotham
+            DropSelected.Text = "..."
+            DropSelected.TextColor3 = Settings.Accent
+            DropSelected.TextSize = 13
+            DropSelected.TextXAlignment = Enum.TextXAlignment.Right
             
             DropScroll.Parent = DropFrame
             DropScroll.BackgroundTransparency = 1
             DropScroll.Position = UDim2.new(0, 0, 0, 45)
             DropScroll.Size = UDim2.new(1, 0, 1, -45)
-            DropScroll.ZIndex = 22
-            
             local List = Instance.new("UIListLayout", DropScroll)
+            List.SortOrder = Enum.SortOrder.LayoutOrder
             List.Padding = UDim.new(0, 5)
             
             local function Refresh(newlist)
                 for _, v in pairs(DropScroll:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
                 for _, v in pairs(newlist) do
                     local Item = Instance.new("TextButton", DropScroll)
-                    Item.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+                    Item.BackgroundColor3 = Color3.fromRGB(55, 40, 35)
                     Item.Size = UDim2.new(1, -20, 0, 30)
+                    Item.Font = Enum.Font.Gotham
                     Item.Text = v
                     Item.TextColor3 = Settings.TextDark
-                    Item.ZIndex = 23
+                    Item.TextSize = 13
                     Instance.new("UICorner", Item).CornerRadius = UDim.new(0, 6)
                     Item.MouseButton1Click:Connect(function()
-                        Selected.Text = v
+                        DropSelected.Text = v
                         pcall(cb, v)
                         DropOpen = false
                         Tween(DropFrame, {Size = UDim2.new(1, -5, 0, 42)}, 0.2)
@@ -716,7 +703,11 @@ function TiRex:Window(name)
             
             DropBtn.MouseButton1Click:Connect(function()
                 DropOpen = not DropOpen
-                Tween(DropFrame, {Size = DropOpen and UDim2.new(1, -5, 0, 150) or UDim2.new(1, -5, 0, 42)}, 0.2)
+                if DropOpen then
+                    Tween(DropFrame, {Size = UDim2.new(1, -5, 0, 150)}, 0.2)
+                else
+                    Tween(DropFrame, {Size = UDim2.new(1, -5, 0, 42)}, 0.2)
+                end
             end)
             
             return {Refresh = Refresh}
