@@ -8,18 +8,35 @@ local function Secure()
         mt.__namecall = newcclosure(function(self, ...)
             local method = getnamecallmethod()
             local args = {...}
-            if method == "Kick" or method == "kick" then return nil end
+            
+            -- 1. Block Client Kicks
+            if method == "Kick" or method == "kick" then
+                return nil
+            end
+            
+            -- 2. Block Suspicious Remotes (Handshakes/Bans)
             if method == "FireServer" or method == "InvokeServer" then
+                local RemoteName = self.Name:lower()
+                -- Block common AC remote names
+                if RemoteName:find("ban") or RemoteName:find("admin") or RemoteName:find("security") or RemoteName:find("check") or RemoteName:find("detect") then
+                    return nil
+                end
+                
+                -- Block suspicious arguments
                 for _, arg in pairs(args) do
                     if type(arg) == "string" then
                         local lower = arg:lower()
-                        if lower:find("ban") or lower:find("kick") or lower:find("detect") or lower:find("flag") then return nil end
+                        if lower:find("ban") or lower:find("kick") or lower:find("detect") or lower:find("flag") or lower:find("handshake") then
+                            return nil
+                        end
                     end
                 end
             end
+            
             return old_namecall(self, ...)
         end)
         
+        -- 3. Spoof Humanoid Properties (Anti-Tamper)
         mt.__index = newcclosure(function(self, k)
             if not checkcaller() then
                 if k == "WalkSpeed" then return 16 end
@@ -49,9 +66,12 @@ local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
+--// GLOBAL CLEANUP //--
+local SpeedConnection = nil -- Holder for Heartbeat connection
+
 local function FullCleanup()
+    if SpeedConnection then SpeedConnection:Disconnect() end
     pcall(function() RunService:UnbindFromRenderStep("TiRex_Fly") end)
-    pcall(function() RunService:UnbindFromRenderStep("TiRex_Speed") end)
     pcall(function() RunService:UnbindFromRenderStep("TiRex_Jump") end)
     pcall(function() RunService:UnbindFromRenderStep("TiRex_Noclip") end)
     
@@ -116,18 +136,24 @@ Home:Button("Destroy GUI", function()
     end
 end)
 
+--// SPEED HACK (HEARTBEAT BYPASS) //--
 local SpeedVal = 16
 Move:Toggle("Speed Hack", false, function(s)
     getgenv().SpeedEnabled = s
     if s then
-        RunService:BindToRenderStep("TiRex_Speed", 100, function()
+        -- Use Heartbeat for physics override
+        if SpeedConnection then SpeedConnection:Disconnect() end
+        SpeedConnection = RunService.Heartbeat:Connect(function()
             if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                -- Force set speed every physics frame
                 LocalPlayer.Character.Humanoid.WalkSpeed = SpeedVal
             end
         end)
     else
-        RunService:UnbindFromRenderStep("TiRex_Speed")
-        if LocalPlayer.Character then LocalPlayer.Character.Humanoid.WalkSpeed = 16 end
+        if SpeedConnection then SpeedConnection:Disconnect() end
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.WalkSpeed = 16
+        end
     end
 end)
 
