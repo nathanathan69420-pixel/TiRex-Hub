@@ -3,10 +3,63 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
+local ScriptContext = game:GetService("ScriptContext")
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
+
+local function Secure()
+    local success, err = pcall(function()
+        local mt = getrawmetatable(game)
+        local old_index = mt.__index
+        local old_namecall = mt.__namecall
+        setreadonly(mt, false)
+        
+        mt.__namecall = newcclosure(function(self, ...)
+            local method = getnamecallmethod()
+            local args = {...}
+            
+            if method == "Kick" or method == "kick" then
+                return nil
+            end
+            
+            if method == "FireServer" or method == "InvokeServer" then
+                for _, arg in pairs(args) do
+                    if type(arg) == "string" then
+                        local lower = arg:lower()
+                        if lower:find("ban") or lower:find("kick") or lower:find("detect") or lower:find("flag") then
+                            return nil
+                        end
+                    end
+                end
+            end
+            
+            return old_namecall(self, ...)
+        end)
+        
+        mt.__index = newcclosure(function(self, k)
+            if not checkcaller() then
+                if k == "WalkSpeed" then
+                    return 16
+                elseif k == "JumpPower" then
+                    return 50
+                end
+            end
+            return old_index(self, k)
+        end)
+        
+        setreadonly(mt, true)
+        
+        for _, v in pairs(ScriptContext:GetConnections()) do
+            v:Disable()
+        end
+        
+        ScriptContext.Error:Connect(function() end)
+    end)
+end
+
+task.spawn(Secure)
 
 local Settings = {
     Name = "TiRex Hub",
