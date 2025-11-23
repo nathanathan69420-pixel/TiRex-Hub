@@ -46,6 +46,7 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
 local function FullCleanup()
@@ -99,13 +100,19 @@ end)
 
 Home:Button("Destroy GUI", function()
     FullCleanup()
-    if TiRex.ActiveInstance then
-        local main = TiRex.ActiveInstance:FindFirstChild("Main")
-        if main then
-            game:GetService("TweenService"):Create(main, TweenInfo.new(0.5), {Size = UDim2.new(0,0,0,0)}):Play()
-            task.wait(0.5)
+    
+    local Target = TiRex.ActiveInstance
+    if not Target then Target = game:GetService("CoreGui"):FindFirstChild("TiRex_Refined") end
+    if not Target and gethui then Target = gethui():FindFirstChild("TiRex_Refined") end
+    
+    if Target then
+        local Main = Target:FindFirstChild("Main")
+        if Main then
+            local t = TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0,0,0,0)})
+            t:Play()
+            t.Completed:Wait()
         end
-        TiRex.ActiveInstance:Destroy()
+        Target:Destroy()
     end
 end)
 
@@ -194,7 +201,17 @@ Move:Toggle("Fly (Universal 3D)", false, function(s)
                     local RightDot = MoveDir:Dot(FlatRight)
                     
                     local FinalVelocity = (Look * ForwardDot) + (Right * RightDot)
-                    HRP.CFrame = HRP.CFrame + (FinalVelocity * FlySpeed * Delta * 5)
+                    
+                    if math.abs(ForwardDot) > 0.1 or math.abs(RightDot) > 0.1 then
+                         HRP.CFrame = HRP.CFrame + (FinalVelocity * FlySpeed * Delta * 5)
+                    end
+                    
+                    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                        HRP.CFrame = HRP.CFrame + (Vector3.new(0,1,0) * FlySpeed * Delta * 2)
+                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+                        HRP.CFrame = HRP.CFrame - (Vector3.new(0,1,0) * FlySpeed * Delta * 2)
+                    end
                 end
             end
         end)
