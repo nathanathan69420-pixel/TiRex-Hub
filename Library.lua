@@ -45,7 +45,8 @@ function TiRex:Window(name)
     local MenuIcon = Instance.new("Frame")
     local MenuList = Instance.new("UIListLayout")
     
-    local MiniToggle = Instance.new("TextButton")
+    --// MINI TOGGLE //--
+    local MiniToggle = Instance.new("ImageButton")
     local MiniCorner = Instance.new("UICorner")
     local MiniStroke = Instance.new("UIStroke")
 
@@ -209,15 +210,18 @@ function TiRex:Window(name)
     Container.Size = UDim2.new(1, -180, 1, -65)
     Container.ZIndex = 1
 
-    --// MINI TOGGLE SETUP //--
+    --// MINI TOGGLE SETUP (FIXED FOR DECALS) //--
     MiniToggle.Parent = ScreenGui
     MiniToggle.BackgroundColor3 = Settings.Header
     MiniToggle.BackgroundTransparency = 0.1
     MiniToggle.Position = UDim2.new(0.5, -25, 0.05, 0)
     MiniToggle.Size = UDim2.new(0, 50, 0, 50)
     MiniToggle.AutoButtonColor = false
-    MiniToggle.Text = "" 
     MiniToggle.ZIndex = 10
+    
+    -- Using rbxthumb to fetch decal texture
+    MiniToggle.Image = "rbxthumb://type=Asset&id=133819129580916&w=150&h=150"
+    MiniToggle.ScaleType = Enum.ScaleType.Fit
     
     MiniCorner.CornerRadius = UDim.new(0, 10)
     MiniCorner.Parent = MiniToggle
@@ -226,17 +230,6 @@ function TiRex:Window(name)
     MiniStroke.Color = Settings.Accent
     MiniStroke.Thickness = 2
     MiniStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-    local MiniIconImage = Instance.new("ImageLabel")
-    MiniIconImage.Parent = MiniToggle
-    MiniIconImage.BackgroundTransparency = 1
-    MiniIconImage.Size = UDim2.new(1, 0, 1, 0)
-    MiniIconImage.Image = "rbxassetid://133819129580916"
-    MiniIconImage.ZIndex = 11
-    
-    local MiniIconCorner = Instance.new("UICorner")
-    MiniIconCorner.CornerRadius = UDim.new(0, 10)
-    MiniIconCorner.Parent = MiniIconImage
 
     local function MakeDraggable(object, dragObject)
         local Dragging = false
