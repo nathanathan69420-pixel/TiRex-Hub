@@ -2,7 +2,7 @@ local PlaceId = game.PlaceId
 local StarterGui = game:GetService("StarterGui")
 local HttpService = game:GetService("HttpService")
 
-local Repo = "https://raw.githubusercontent.com/nathanathan69420-pixel/TiRex-Hub/refs/heads/main/"
+local Repo = "https://raw.githubusercontent.com/nathanathan69420-pixel/TiRex-Hub/main/"
 
 local SupportedGames = {
     [79546208627805] = "Games/99Nights.lua",
@@ -37,7 +37,8 @@ local function LoadScript(ScriptPath)
     local Func, LoadErr = loadstring(Content)
     
     if not Func then
-        Notify("Syntax Error", "Script loaded but failed to compile.")
+        Notify("Syntax Error", "Check F9 Console for 404 HTML.")
+        print("[TiRex Debug] Content loaded was:", string.sub(Content, 1, 100))
         return
     end
 
