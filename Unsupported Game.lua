@@ -8,35 +8,18 @@ local function Secure()
         mt.__namecall = newcclosure(function(self, ...)
             local method = getnamecallmethod()
             local args = {...}
-            
-            -- 1. Block Client Kicks
-            if method == "Kick" or method == "kick" then
-                return nil
-            end
-            
-            -- 2. Block Suspicious Remotes (Handshakes/Bans)
+            if method == "Kick" or method == "kick" then return nil end
             if method == "FireServer" or method == "InvokeServer" then
-                local RemoteName = self.Name:lower()
-                -- Block common AC remote names
-                if RemoteName:find("ban") or RemoteName:find("admin") or RemoteName:find("security") or RemoteName:find("check") or RemoteName:find("detect") then
-                    return nil
-                end
-                
-                -- Block suspicious arguments
                 for _, arg in pairs(args) do
                     if type(arg) == "string" then
                         local lower = arg:lower()
-                        if lower:find("ban") or lower:find("kick") or lower:find("detect") or lower:find("flag") or lower:find("handshake") then
-                            return nil
-                        end
+                        if lower:find("ban") or lower:find("kick") or lower:find("detect") or lower:find("flag") then return nil end
                     end
                 end
             end
-            
             return old_namecall(self, ...)
         end)
         
-        -- 3. Spoof Humanoid Properties (Anti-Tamper)
         mt.__index = newcclosure(function(self, k)
             if not checkcaller() then
                 if k == "WalkSpeed" then return 16 end
@@ -51,11 +34,12 @@ local function Secure()
 end
 task.spawn(Secure)
 
-local TiRex = loadstring(game:HttpGet("https://raw.githubusercontent.com/nathanathan69420-pixel/TiRex-Hub/main/Library.lua"))()
+local TiRex = loadstring(game:HttpGet("https://raw.githubusercontent.com/nathanathan69420-pixel/TiRex-Hub/refs/heads/main/Library.lua"))()
 
 local Hub = TiRex:Window("TiRex Hub")
 local Home = Hub:Tab("🏠 | Home", "")
 local Move = Hub:Tab("⚡ | Movement", "")
+local Vis = Hub:Tab("🖼️ | Visuals", "")
 local Sett = Hub:Tab("⚙️ | Settings", "")
 
 local Players = game:GetService("Players")
@@ -64,16 +48,15 @@ local UserInputService = game:GetService("UserInputService")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
 
---// GLOBAL CLEANUP //--
-local SpeedConnection = nil -- Holder for Heartbeat connection
-
 local function FullCleanup()
-    if SpeedConnection then SpeedConnection:Disconnect() end
     pcall(function() RunService:UnbindFromRenderStep("TiRex_Fly") end)
+    pcall(function() RunService:UnbindFromRenderStep("TiRex_Speed") end)
     pcall(function() RunService:UnbindFromRenderStep("TiRex_Jump") end)
     pcall(function() RunService:UnbindFromRenderStep("TiRex_Noclip") end)
+    pcall(function() RunService:UnbindFromRenderStep("TiRex_Fullbright") end)
     
     getgenv().SpeedEnabled = false
     getgenv().JumpEnabled = false
@@ -93,6 +76,15 @@ local function FullCleanup()
         end
         for _, v in pairs(Char:GetDescendants()) do
             if v:IsA("BasePart") then v.CanCollide = true end
+        end
+        if Char:FindFirstChild("TiRexHighlight") then
+            Char.TiRexHighlight:Destroy()
+        end
+    end
+    
+    for _, v in pairs(Players:GetPlayers()) do
+        if v.Character and v.Character:FindFirstChild("TiRexHighlight") then
+            v.Character.TiRexHighlight:Destroy()
         end
     end
 end
@@ -120,11 +112,9 @@ end)
 
 Home:Button("Destroy GUI", function()
     FullCleanup()
-    
     local Target = TiRex.ActiveInstance
     if not Target then Target = game:GetService("CoreGui"):FindFirstChild("TiRex_Refined") end
     if not Target and gethui then Target = gethui():FindFirstChild("TiRex_Refined") end
-    
     if Target then
         local Main = Target:FindFirstChild("Main")
         if Main then
@@ -136,24 +126,18 @@ Home:Button("Destroy GUI", function()
     end
 end)
 
---// SPEED HACK (HEARTBEAT BYPASS) //--
 local SpeedVal = 16
 Move:Toggle("Speed Hack", false, function(s)
     getgenv().SpeedEnabled = s
     if s then
-        -- Use Heartbeat for physics override
-        if SpeedConnection then SpeedConnection:Disconnect() end
-        SpeedConnection = RunService.Heartbeat:Connect(function()
+        RunService:BindToRenderStep("TiRex_Speed", 100, function()
             if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-                -- Force set speed every physics frame
                 LocalPlayer.Character.Humanoid.WalkSpeed = SpeedVal
             end
         end)
     else
-        if SpeedConnection then SpeedConnection:Disconnect() end
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.WalkSpeed = 16
-        end
+        RunService:UnbindFromRenderStep("TiRex_Speed")
+        if LocalPlayer.Character then LocalPlayer.Character.Humanoid.WalkSpeed = 16 end
     end
 end)
 
@@ -251,6 +235,72 @@ Move:Toggle("Fly (Universal 3D)", false, function(s)
 end)
 
 Move:Slider("Fly Speed", 16, 100, 16, function(v) FlySpeed = v end)
+
+--// VISUALS //--
+Vis:Toggle("Fullbright", false, function(s)
+    if s then
+        RunService:BindToRenderStep("TiRex_Fullbright", 100, function()
+            Lighting.Brightness = 2
+            Lighting.ClockTime = 14
+            Lighting.FogEnd = 100000
+            Lighting.GlobalShadows = false
+            Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+        end)
+    else
+        RunService:UnbindFromRenderStep("TiRex_Fullbright")
+        Lighting.Brightness = 1
+        Lighting.GlobalShadows = true
+        Lighting.FogEnd = 1000
+    end
+end)
+
+local ESP_Color = Color3.new(1, 1, 1)
+local ESP_Enabled = false
+
+local function AddESP(plr)
+    if plr == LocalPlayer then return end
+    if not plr.Character then return end
+    if plr.Character:FindFirstChild("TiRexHighlight") then
+        plr.Character.TiRexHighlight:Destroy()
+    end
+    
+    local H = Instance.new("Highlight")
+    H.Name = "TiRexHighlight"
+    H.FillTransparency = 0.55
+    H.OutlineColor = ESP_Color
+    H.FillColor = ESP_Color
+    H.Parent = plr.Character
+end
+
+Vis:Toggle("Player ESP", false, function(s)
+    ESP_Enabled = s
+    if s then
+        for _, v in pairs(Players:GetPlayers()) do AddESP(v) end
+        Players.PlayerAdded:Connect(function(plr)
+            plr.CharacterAdded:Connect(function()
+                if ESP_Enabled then task.wait(1) AddESP(plr) end
+            end)
+        end)
+    else
+        for _, v in pairs(Players:GetPlayers()) do
+            if v.Character and v.Character:FindFirstChild("TiRexHighlight") then
+                v.Character.TiRexHighlight:Destroy()
+            end
+        end
+    end
+end)
+
+Vis:ColorPicker("ESP Color", Color3.new(1, 1, 1), function(c)
+    ESP_Color = c
+    if ESP_Enabled then
+        for _, v in pairs(Players:GetPlayers()) do
+            if v.Character and v.Character:FindFirstChild("TiRexHighlight") then
+                v.Character.TiRexHighlight.OutlineColor = c
+                v.Character.TiRexHighlight.FillColor = c
+            end
+        end
+    end
+end)
 
 Sett:Button("Rejoin Server", function()
     TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
