@@ -1,14 +1,3 @@
-local TiRex = {}
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local HttpService = game:GetService("HttpService")
-local RunService = game:GetService("RunService")
-local ScriptContext = game:GetService("ScriptContext")
-local Players = game:GetService("Players")
-local CoreGui = game:GetService("CoreGui")
-local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
-
 local function Secure()
     local success, err = pcall(function()
         local mt = getrawmetatable(game)
@@ -40,974 +29,88 @@ local function Secure()
         
         mt.__index = newcclosure(function(self, k)
             if not checkcaller() then
-                if k == "WalkSpeed" then
-                    return 16
-                elseif k == "JumpPower" then
-                    return 50
-                end
+                if k == "WalkSpeed" then return 16 end
+                if k == "JumpPower" then return 50 end
             end
             return old_index(self, k)
         end)
         
         setreadonly(mt, true)
-        
-        for _, v in pairs(ScriptContext:GetConnections()) do
-            v:Disable()
-        end
-        
-        ScriptContext.Error:Connect(function() end)
+        game:GetService("ScriptContext").Error:Connect(function() end)
     end)
 end
-
 task.spawn(Secure)
 
-local Settings = {
-    Name = "TiRex Hub",
-    Accent = Color3.fromRGB(160, 60, 255),
-    Background = Color3.fromRGB(10, 10, 12),
-    Header = Color3.fromRGB(15, 15, 18),
-    Sidebar = Color3.fromRGB(14, 14, 17),
-    Element = Color3.fromRGB(20, 20, 24),
-    Text = Color3.fromRGB(240, 240, 240),
-    TextDark = Color3.fromRGB(140, 140, 150)
-}
-
-local Flags = {}
-local ElementMap = {}
-
-if not isfolder("TiRex") then makefolder("TiRex") end
-if not isfolder("TiRex/Configs") then makefolder("TiRex/Configs") end
-
-local function Tween(obj, props, time, style, dir)
-    TweenService:Create(obj, TweenInfo.new(time or 0.2, style or Enum.EasingStyle.Quad, dir or Enum.EasingDirection.Out), props):Play()
-end
-
-function TiRex:Window(name)
-    local function Clear(parent)
-        for _, v in pairs(parent:GetChildren()) do
-            if v.Name == "TiRex_Refined" then
-                v:Destroy()
-            end
-        end
-    end
-    
-    Clear(CoreGui)
-    if gethui then Clear(gethui()) end
-    if TiRex.ActiveInstance and TiRex.ActiveInstance.Parent then
-        TiRex.ActiveInstance:Destroy()
-    end
-
-    local ScreenGui = Instance.new("ScreenGui")
-    local Main = Instance.new("Frame")
-    local MainCorner = Instance.new("UICorner")
-    local MainStroke = Instance.new("UIStroke")
-    local Shadow = Instance.new("ImageLabel")
-    local Header = Instance.new("Frame")
-    local HeaderCorner = Instance.new("UICorner")
-    local Title = Instance.new("TextLabel")
-    local MenuBtn = Instance.new("TextButton")
-    local CloseBtn = Instance.new("TextButton")
-    local CloseCorner = Instance.new("UICorner")
-    local Sidebar = Instance.new("Frame")
-    local SidebarCorner = Instance.new("UICorner")
-    local TabHolder = Instance.new("ScrollingFrame")
-    local TabList = Instance.new("UIListLayout")
-    local Container = Instance.new("Frame")
-    local MenuIcon = Instance.new("Frame")
-    local MenuList = Instance.new("UIListLayout")
-    
-    local MiniToggle = Instance.new("TextButton")
-    local MiniCorner = Instance.new("UICorner")
-    local MiniStroke = Instance.new("UIStroke")
-
-    if syn and syn.protect_gui then
-        syn.protect_gui(ScreenGui)
-        ScreenGui.Parent = CoreGui
-    elseif gethui then
-        ScreenGui.Parent = gethui()
-    else
-        ScreenGui.Parent = CoreGui
-    end
-
-    TiRex.ActiveInstance = ScreenGui
-    ScreenGui.Name = "TiRex_Refined"
-    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-    Main.Name = "Main"
-    Main.Parent = ScreenGui
-    Main.BackgroundColor3 = Settings.Background
-    Main.BackgroundTransparency = 0.1
-    Main.AnchorPoint = Vector2.new(0.5, 0.5)
-    Main.Position = UDim2.new(0.5, 0, 0.5, 0)
-    Main.Size = UDim2.new(0, 0, 0, 0)
-    Main.ClipsDescendants = true
-    Main.Visible = false 
-    
-    MainCorner.CornerRadius = UDim.new(0, 12)
-    MainCorner.Parent = Main
-
-    MainStroke.Parent = Main
-    MainStroke.Color = Color3.fromRGB(40, 40, 50)
-    MainStroke.Thickness = 1
-    MainStroke.Transparency = 0.6
-
-    Shadow.Name = "Shadow"
-    Shadow.Parent = Main
-    Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-    Shadow.BackgroundTransparency = 1
-    Shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
-    Shadow.Size = UDim2.new(1, 40, 1, 40)
-    Shadow.ZIndex = 0
-    Shadow.Image = "rbxassetid://6014261993"
-    Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-    Shadow.ImageTransparency = 0.5
-    Shadow.ScaleType = Enum.ScaleType.Slice
-    Shadow.SliceCenter = Rect.new(49, 49, 450, 450)
-
-    Header.Name = "Header"
-    Header.Parent = Main
-    Header.BackgroundColor3 = Settings.Header
-    Header.BackgroundTransparency = 0.05
-    Header.Size = UDim2.new(1, 0, 0, 45)
-    Header.ZIndex = 2
-    
-    HeaderCorner.CornerRadius = UDim.new(0, 12)
-    HeaderCorner.Parent = Header
-
-    local HeaderFill = Instance.new("Frame")
-    HeaderFill.Parent = Header
-    HeaderFill.BackgroundColor3 = Settings.Header
-    HeaderFill.BackgroundTransparency = 0.05
-    HeaderFill.BorderSizePixel = 0
-    HeaderFill.Position = UDim2.new(0, 0, 1, -10)
-    HeaderFill.Size = UDim2.new(1, 0, 0, 10)
-    HeaderFill.ZIndex = 2
-
-    Title.Name = "Title"
-    Title.Parent = Header
-    Title.BackgroundTransparency = 1
-    Title.Position = UDim2.new(0, 50, 0, 0)
-    Title.Size = UDim2.new(0, 200, 1, 0)
-    Title.Font = Enum.Font.GothamBold
-    Title.Text = name
-    Title.TextColor3 = Settings.Text
-    Title.TextSize = 18
-    Title.TextXAlignment = Enum.TextXAlignment.Left
-    Title.ZIndex = 3
-
-    MenuBtn.Name = "MenuBtn"
-    MenuBtn.Parent = Header
-    MenuBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    MenuBtn.BackgroundTransparency = 1
-    MenuBtn.Position = UDim2.new(0, 12, 0.5, -12)
-    MenuBtn.Size = UDim2.new(0, 24, 0, 24)
-    MenuBtn.Text = ""
-    MenuBtn.ZIndex = 3
-
-    MenuIcon.Parent = MenuBtn
-    MenuIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    MenuIcon.BackgroundTransparency = 1
-    MenuIcon.Size = UDim2.new(1, 0, 1, 0)
-    MenuIcon.Rotation = 90 
-    
-    MenuList.Parent = MenuIcon
-    MenuList.SortOrder = Enum.SortOrder.LayoutOrder
-    MenuList.Padding = UDim.new(0, 4)
-    MenuList.VerticalAlignment = Enum.VerticalAlignment.Center
-    
-    for i = 1, 3 do
-        local dot = Instance.new("Frame")
-        dot.Parent = MenuIcon
-        dot.BackgroundColor3 = Settings.TextDark
-        dot.Size = UDim2.new(1, 0, 0, 3)
-        dot.BorderSizePixel = 0
-        local dc = Instance.new("UICorner")
-        dc.CornerRadius = UDim.new(1, 0)
-        dc.Parent = dot
-    end
-
-    CloseBtn.Name = "CloseBtn"
-    CloseBtn.Parent = Header
-    CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-    CloseBtn.BackgroundTransparency = 1
-    CloseBtn.Position = UDim2.new(1, -34, 0.5, -12)
-    CloseBtn.Size = UDim2.new(0, 24, 0, 24)
-    CloseBtn.Font = Enum.Font.GothamBold
-    CloseBtn.Text = "X"
-    CloseBtn.TextColor3 = Settings.TextDark
-    CloseBtn.TextSize = 14
-    CloseBtn.ZIndex = 3
-
-    CloseCorner.CornerRadius = UDim.new(0, 6)
-    CloseCorner.Parent = CloseBtn
-
-    CloseBtn.MouseEnter:Connect(function()
-        Tween(CloseBtn, {BackgroundTransparency = 0.2, TextColor3 = Color3.fromRGB(255, 255, 255)}, 0.2)
-    end)
-    CloseBtn.MouseLeave:Connect(function()
-        Tween(CloseBtn, {BackgroundTransparency = 1, TextColor3 = Settings.TextDark}, 0.2)
-    end)
-    CloseBtn.MouseButton1Click:Connect(function()
-        Tween(Main, {Size = UDim2.new(0, 0, 0, 0)}, 0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In)
-        wait(0.3)
-        Main.Visible = false
-    end)
-
-    Sidebar.Name = "Sidebar"
-    Sidebar.Parent = Main
-    Sidebar.BackgroundColor3 = Settings.Sidebar
-    Sidebar.BackgroundTransparency = 0.05
-    Sidebar.Position = UDim2.new(0, 0, 0, 45)
-    Sidebar.Size = UDim2.new(0, 160, 1, -45)
-    Sidebar.ZIndex = 2
-    Sidebar.BorderSizePixel = 0
-    
-    SidebarCorner.CornerRadius = UDim.new(0, 12)
-    SidebarCorner.Parent = Sidebar
-
-    local SidebarTopFill = Instance.new("Frame")
-    SidebarTopFill.Parent = Sidebar
-    SidebarTopFill.BackgroundColor3 = Settings.Sidebar
-    SidebarTopFill.BackgroundTransparency = 0.05
-    SidebarTopFill.BorderSizePixel = 0
-    SidebarTopFill.Size = UDim2.new(1, 0, 0, 10)
-    SidebarTopFill.ZIndex = 2
-    
-    local SidebarRightFill = Instance.new("Frame")
-    SidebarRightFill.Parent = Sidebar
-    SidebarRightFill.BackgroundColor3 = Settings.Sidebar
-    SidebarRightFill.BackgroundTransparency = 0.05
-    SidebarRightFill.BorderSizePixel = 0
-    SidebarRightFill.Position = UDim2.new(1, -10, 0, 0)
-    SidebarRightFill.Size = UDim2.new(0, 10, 1, 0)
-    SidebarRightFill.ZIndex = 2
-
-    TabHolder.Parent = Sidebar
-    TabHolder.BackgroundTransparency = 1
-    TabHolder.Position = UDim2.new(0, 10, 0, 10)
-    TabHolder.Size = UDim2.new(1, -20, 1, -20)
-    TabHolder.ScrollBarThickness = 0
-    TabHolder.ZIndex = 3
-
-    TabList.Parent = TabHolder
-    TabList.Padding = UDim.new(0, 5)
-    TabList.SortOrder = Enum.SortOrder.LayoutOrder
-
-    Container.Name = "Container"
-    Container.Parent = Main
-    Container.BackgroundTransparency = 1
-    Container.Position = UDim2.new(0, 170, 0, 55)
-    Container.Size = UDim2.new(1, -180, 1, -65)
-    Container.ZIndex = 1
-
-    MiniToggle.Name = "MiniToggle"
-    MiniToggle.Parent = ScreenGui
-    MiniToggle.BackgroundColor3 = Settings.Header
-    MiniToggle.BackgroundTransparency = 0.1
-    MiniToggle.Position = UDim2.new(0.5, -25, 0.05, 0)
-    MiniToggle.Size = UDim2.new(0, 50, 0, 50)
-    MiniToggle.AutoButtonColor = false
-    MiniToggle.Text = "T"
-    MiniToggle.Font = Enum.Font.GothamBold
-    MiniToggle.TextSize = 32
-    MiniToggle.TextColor3 = Settings.Accent
-    MiniToggle.ZIndex = 10
-
-    MiniCorner.CornerRadius = UDim.new(0, 10)
-    MiniCorner.Parent = MiniToggle
-
-    MiniStroke.Parent = MiniToggle
-    MiniStroke.Color = Settings.Accent
-    MiniStroke.Thickness = 2
-    MiniStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-    local function MakeDraggable(object, dragObject)
-        local Dragging = nil
-        local DragInput = nil
-        local DragStart = nil
-        local StartPosition = nil
-        local IsDragging = false
-
-        dragObject.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                Dragging = true
-                DragStart = input.Position
-                StartPosition = object.Position
-                IsDragging = false
-                
-                input.Changed:Connect(function()
-                    if input.UserInputState == Enum.UserInputState.End then
-                        Dragging = false
-                    end
-                end)
-            end
-        end)
-
-        dragObject.InputChanged:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-                DragInput = input
-            end
-        end)
-
-        UserInputService.InputChanged:Connect(function(input)
-            if input == DragInput and Dragging then
-                local Delta = input.Position - DragStart
-                if Delta.Magnitude > 2 then IsDragging = true end
-                object.Position = UDim2.new(StartPosition.X.Scale, StartPosition.X.Offset + Delta.X, StartPosition.Y.Scale, StartPosition.Y.Offset + Delta.Y)
-            end
-        end)
-        
-        return function() return IsDragging end
-    end
-
-    MakeDraggable(Main, Header)
-    local CheckMiniDrag = MakeDraggable(MiniToggle, MiniToggle)
-
-    MiniToggle.MouseButton1Click:Connect(function()
-        if not CheckMiniDrag() then
-            if Main.Visible then
-                Tween(Main, {Size = UDim2.new(0, 0, 0, 0)}, 0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In)
-                wait(0.3)
-                Main.Visible = false
-            else
-                Main.Visible = true
-                Tween(Main, {Size = UDim2.new(0, 550, 0, 350)}, 0.6, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out)
-            end
-        end
-    end)
-
-    Main.Visible = true
-    Tween(Main, {Size = UDim2.new(0, 550, 0, 350)}, 0.6, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out)
-
-    local SidebarOpen = true
-    MenuBtn.MouseButton1Click:Connect(function()
-        SidebarOpen = not SidebarOpen
-        if SidebarOpen then
-            Tween(MenuIcon, {Rotation = 90}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-            Tween(Sidebar, {Size = UDim2.new(0, 160, 1, -45)}, 0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-            Tween(Container, {Position = UDim2.new(0, 170, 0, 55), Size = UDim2.new(1, -180, 1, -65)}, 0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-            for _, v in pairs(MenuIcon:GetChildren()) do
-                if v:IsA("Frame") then Tween(v, {BackgroundColor3 = Settings.TextDark}, 0.2) end
-            end
-        else
-            Tween(MenuIcon, {Rotation = 0}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-            Tween(Sidebar, {Size = UDim2.new(0, 0, 1, -45)}, 0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-            Tween(Container, {Position = UDim2.new(0, 10, 0, 55), Size = UDim2.new(1, -20, 1, -65)}, 0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-            for _, v in pairs(MenuIcon:GetChildren()) do
-                if v:IsA("Frame") then Tween(v, {BackgroundColor3 = Settings.Accent}, 0.2) end
-            end
-        end
-    end)
-
-    local Window = {}
-    local FirstTab = true
-
-    function Window:Tab(text, icon)
-        local TabBtn = Instance.new("TextButton")
-        local TabTitle = Instance.new("TextLabel")
-        local TabCorner = Instance.new("UICorner")
-        
-        local TabPage = Instance.new("ScrollingFrame")
-        local PageList = Instance.new("UIListLayout")
-        local PagePad = Instance.new("UIPadding")
-
-        TabBtn.Parent = TabHolder
-        TabBtn.BackgroundColor3 = Settings.Sidebar
-        TabBtn.BackgroundTransparency = 1
-        TabBtn.Size = UDim2.new(1, 0, 0, 32)
-        TabBtn.AutoButtonColor = false
-        TabBtn.Text = ""
-        TabBtn.ZIndex = 3
-
-        TabCorner.CornerRadius = UDim.new(0, 8)
-        TabCorner.Parent = TabBtn
-
-        TabTitle.Parent = TabBtn
-        TabTitle.BackgroundTransparency = 1
-        TabTitle.Position = UDim2.new(0, 10, 0, 0)
-        TabTitle.Size = UDim2.new(1, -10, 1, 0)
-        TabTitle.Font = Enum.Font.GothamMedium
-        TabTitle.Text = text
-        TabTitle.TextColor3 = Settings.TextDark
-        TabTitle.TextSize = 14
-        TabTitle.TextXAlignment = Enum.TextXAlignment.Left
-        TabTitle.ZIndex = 3
-
-        TabPage.Parent = Container
-        TabPage.BackgroundTransparency = 1
-        TabPage.Size = UDim2.new(1, 0, 1, 0)
-        TabPage.ScrollBarThickness = 2
-        TabPage.ScrollBarImageColor3 = Settings.Accent
-        TabPage.Visible = false
-
-        PageList.Parent = TabPage
-        PageList.SortOrder = Enum.SortOrder.LayoutOrder
-        PageList.Padding = UDim.new(0, 8)
-
-        PagePad.Parent = TabPage
-        PagePad.PaddingTop = UDim.new(0, 5)
-        PagePad.PaddingBottom = UDim.new(0, 5)
-
-        local function Update()
-            if TabPage.Visible then
-                Tween(TabTitle, {TextColor3 = Settings.Accent}, 0.2)
-                Tween(TabBtn, {BackgroundTransparency = 0.9}, 0.2)
-            else
-                Tween(TabTitle, {TextColor3 = Settings.TextDark}, 0.2)
-                Tween(TabBtn, {BackgroundTransparency = 1}, 0.2)
-            end
-        end
-
-        TabBtn.MouseButton1Click:Connect(function()
-            for _, v in pairs(Container:GetChildren()) do
-                if v:IsA("ScrollingFrame") then v.Visible = false end
-            end
-            for _, v in pairs(TabHolder:GetChildren()) do
-                if v:IsA("TextButton") then
-                    Tween(v.TextLabel, {TextColor3 = Settings.TextDark}, 0.2)
-                    Tween(v, {BackgroundTransparency = 1}, 0.2)
-                end
-            end
-            TabPage.Visible = true
-            Update()
-        end)
-
-        if FirstTab then
-            FirstTab = false
-            TabPage.Visible = true
-            Update()
-        end
-
-        TabBtn.MouseEnter:Connect(function()
-            if not TabPage.Visible then
-                Tween(TabTitle, {TextColor3 = Settings.Text}, 0.2)
-            end
-        end)
-        TabBtn.MouseLeave:Connect(function()
-            if not TabPage.Visible then
-                Tween(TabTitle, {TextColor3 = Settings.TextDark}, 0.2)
-            end
-        end)
-
-        local Elements = {}
-
-        function Elements:Button(text, cb)
-            local Btn = Instance.new("TextButton")
-            local BtnCorner = Instance.new("UICorner")
-            local BtnStroke = Instance.new("UIStroke")
-            
-            Btn.Parent = TabPage
-            Btn.BackgroundColor3 = Settings.Element
-            Btn.BackgroundTransparency = 0.2
-            Btn.Size = UDim2.new(1, -5, 0, 42)
-            Btn.AutoButtonColor = false
-            Btn.Font = Enum.Font.GothamMedium
-            Btn.Text = text
-            Btn.TextColor3 = Settings.Text
-            Btn.TextSize = 14
-            
-            BtnCorner.CornerRadius = UDim.new(0, 8)
-            BtnCorner.Parent = Btn
-            
-            BtnStroke.Parent = Btn
-            BtnStroke.Color = Color3.fromRGB(40, 40, 50)
-            BtnStroke.Thickness = 1
-            BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-            BtnStroke.Transparency = 0.5
-
-            Btn.MouseEnter:Connect(function()
-                Tween(Btn, {BackgroundColor3 = Color3.fromRGB(30, 30, 36), BackgroundTransparency = 0.1}, 0.2)
-                Tween(BtnStroke, {Color = Settings.Accent, Transparency = 0}, 0.2)
-            end)
-            
-            Btn.MouseLeave:Connect(function()
-                Tween(Btn, {BackgroundColor3 = Settings.Element, BackgroundTransparency = 0.2}, 0.2)
-                Tween(BtnStroke, {Color = Color3.fromRGB(40, 40, 50), Transparency = 0.5}, 0.2)
-            end)
-            
-            Btn.MouseButton1Click:Connect(function()
-                Tween(Btn, {TextSize = 12}, 0.1)
-                wait(0.1)
-                Tween(Btn, {TextSize = 14}, 0.1)
-                pcall(cb)
-            end)
-        end
-
-        function Elements:Toggle(text, default, cb)
-            local Toggled = default or false
-            Flags[text] = Toggled
-            
-            local TogBtn = Instance.new("TextButton")
-            local TogCorner = Instance.new("UICorner")
-            local TogStroke = Instance.new("UIStroke")
-            local TogTitle = Instance.new("TextLabel")
-            local Switch = Instance.new("Frame")
-            local SwitchCorner = Instance.new("UICorner")
-            local Dot = Instance.new("Frame")
-            local DotCorner = Instance.new("UICorner")
-
-            TogBtn.Parent = TabPage
-            TogBtn.BackgroundColor3 = Settings.Element
-            TogBtn.BackgroundTransparency = 0.2
-            TogBtn.Size = UDim2.new(1, -5, 0, 42)
-            TogBtn.AutoButtonColor = false
-            TogBtn.Text = ""
-            
-            TogCorner.CornerRadius = UDim.new(0, 8)
-            TogCorner.Parent = TogBtn
-            
-            TogStroke.Parent = TogBtn
-            TogStroke.Color = Color3.fromRGB(40, 40, 50)
-            TogStroke.Thickness = 1
-            TogStroke.Transparency = 0.5
-            
-            TogTitle.Parent = TogBtn
-            TogTitle.BackgroundTransparency = 1
-            TogTitle.Position = UDim2.new(0, 15, 0, 0)
-            TogTitle.Size = UDim2.new(1, -65, 1, 0)
-            TogTitle.Font = Enum.Font.GothamMedium
-            TogTitle.Text = text
-            TogTitle.TextColor3 = Settings.Text
-            TogTitle.TextSize = 14
-            TogTitle.TextXAlignment = Enum.TextXAlignment.Left
-            
-            Switch.Parent = TogBtn
-            Switch.BackgroundColor3 = Toggled and Settings.Accent or Color3.fromRGB(40, 40, 45)
-            Switch.Position = UDim2.new(1, -50, 0.5, -10)
-            Switch.Size = UDim2.new(0, 36, 0, 20)
-            
-            SwitchCorner.CornerRadius = UDim.new(1, 0)
-            SwitchCorner.Parent = Switch
-            
-            Dot.Parent = Switch
-            Dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Dot.Position = Toggled and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
-            Dot.Size = UDim2.new(0, 16, 0, 16)
-            
-            DotCorner.CornerRadius = UDim.new(1, 0)
-            DotCorner.Parent = Dot
-
-            local function Toggle()
-                Toggled = not Toggled
-                Flags[text] = Toggled
-                local targetColor = Toggled and Settings.Accent or Color3.fromRGB(40, 40, 45)
-                local targetPos = Toggled and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
-                
-                Tween(Switch, {BackgroundColor3 = targetColor}, 0.2)
-                Tween(Dot, {Position = targetPos}, 0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-                
-                pcall(cb, Toggled)
-            end
-
-            TogBtn.MouseEnter:Connect(function()
-                Tween(TogBtn, {BackgroundColor3 = Color3.fromRGB(30, 30, 36), BackgroundTransparency = 0.1}, 0.2)
-            end)
-            TogBtn.MouseLeave:Connect(function()
-                Tween(TogBtn, {BackgroundColor3 = Settings.Element, BackgroundTransparency = 0.2}, 0.2)
-            end)
-            TogBtn.MouseButton1Click:Connect(Toggle)
-            
-            if default then
-                Toggled = false
-                Toggle()
-            end
-            
-            ElementMap[text] = {
-                Type = "Toggle",
-                Set = function(val)
-                    Toggled = not val
-                    Toggle()
-                end
-            }
-        end
-        
-        function Elements:Slider(text, min, max, default, cb)
-            local Value = default or min
-            Flags[text] = Value
-            local Dragging = false
-            
-            local SlideBtn = Instance.new("TextButton")
-            local SlideCorner = Instance.new("UICorner")
-            local SlideStroke = Instance.new("UIStroke")
-            local SlideTitle = Instance.new("TextLabel")
-            local SlideVal = Instance.new("TextLabel")
-            local BarBg = Instance.new("Frame")
-            local BarBgCorner = Instance.new("UICorner")
-            local BarFill = Instance.new("Frame")
-            local BarFillCorner = Instance.new("UICorner")
-            local Knob = Instance.new("Frame")
-            local KnobCorner = Instance.new("UICorner")
-            
-            SlideBtn.Parent = TabPage
-            SlideBtn.BackgroundColor3 = Settings.Element
-            SlideBtn.BackgroundTransparency = 0.2
-            SlideBtn.Size = UDim2.new(1, -5, 0, 50)
-            SlideBtn.AutoButtonColor = false
-            SlideBtn.Text = ""
-            
-            SlideCorner.CornerRadius = UDim.new(0, 8)
-            SlideCorner.Parent = SlideBtn
-            
-            SlideStroke.Parent = SlideBtn
-            SlideStroke.Color = Color3.fromRGB(40, 40, 50)
-            SlideStroke.Thickness = 1
-            SlideStroke.Transparency = 0.5
-            
-            SlideTitle.Parent = SlideBtn
-            SlideTitle.BackgroundTransparency = 1
-            SlideTitle.Position = UDim2.new(0, 15, 0, 5)
-            SlideTitle.Size = UDim2.new(1, -30, 0, 20)
-            SlideTitle.Font = Enum.Font.GothamMedium
-            SlideTitle.Text = text
-            SlideTitle.TextColor3 = Settings.Text
-            SlideTitle.TextSize = 14
-            SlideTitle.TextXAlignment = Enum.TextXAlignment.Left
-            
-            SlideVal.Parent = SlideBtn
-            SlideVal.BackgroundTransparency = 1
-            SlideVal.Position = UDim2.new(0, 15, 0, 5)
-            SlideVal.Size = UDim2.new(1, -30, 0, 20)
-            SlideVal.Font = Enum.Font.GothamMedium
-            SlideVal.Text = tostring(Value)
-            SlideVal.TextColor3 = Settings.TextDark
-            SlideVal.TextSize = 14
-            SlideVal.TextXAlignment = Enum.TextXAlignment.Right
-            
-            BarBg.Parent = SlideBtn
-            BarBg.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-            BarBg.Position = UDim2.new(0, 15, 0, 32)
-            BarBg.Size = UDim2.new(1, -30, 0, 6)
-            
-            BarBgCorner.CornerRadius = UDim.new(1, 0)
-            BarBgCorner.Parent = BarBg
-            
-            BarFill.Parent = BarBg
-            BarFill.BackgroundColor3 = Settings.Accent
-            BarFill.Size = UDim2.new((Value - min) / (max - min), 0, 1, 0)
-            BarFill.BorderSizePixel = 0
-            
-            BarFillCorner.CornerRadius = UDim.new(1, 0)
-            BarFillCorner.Parent = BarFill
-            
-            Knob.Parent = BarFill
-            Knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Knob.Position = UDim2.new(1, -5, 0.5, -5)
-            Knob.Size = UDim2.new(0, 10, 0, 10)
-            
-            KnobCorner.CornerRadius = UDim.new(1, 0)
-            KnobCorner.Parent = Knob
-            
-            local function Update(input)
-                local SizeX = BarBg.AbsoluteSize.X
-                local PosX = BarBg.AbsolutePosition.X
-                local Percent = math.clamp((input.Position.X - PosX) / SizeX, 0, 1)
-                Value = math.floor(min + ((max - min) * Percent))
-                Flags[text] = Value
-                
-                Tween(BarFill, {Size = UDim2.new(Percent, 0, 1, 0)}, 0.1)
-                SlideVal.Text = tostring(Value)
-                pcall(cb, Value)
-            end
-            
-            SlideBtn.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    Dragging = true
-                    Update(input)
-                    input.Changed:Connect(function()
-                        if input.UserInputState == Enum.UserInputState.End then
-                            Dragging = false
-                        end
-                    end)
-                end
-            end)
-            
-            UserInputService.InputChanged:Connect(function(input)
-                if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                    Update(input)
-                end
-            end)
-            
-            ElementMap[text] = {
-                Type = "Slider",
-                Set = function(val)
-                    Value = val
-                    Flags[text] = val
-                    local Percent = (Value - min) / (max - min)
-                    Tween(BarFill, {Size = UDim2.new(Percent, 0, 1, 0)}, 0.1)
-                    SlideVal.Text = tostring(Value)
-                    pcall(cb, Value)
-                end
-            }
-        end
-        
-        function Elements:Label(text)
-            local Lab = Instance.new("TextLabel")
-            local LabCorner = Instance.new("UICorner")
-            
-            Lab.Parent = TabPage
-            Lab.BackgroundColor3 = Settings.Element
-            Lab.BackgroundTransparency = 0.4
-            Lab.Size = UDim2.new(1, -5, 0, 0) 
-            Lab.Font = Enum.Font.GothamMedium
-            Lab.Text = text
-            Lab.TextColor3 = Settings.Text
-            Lab.TextSize = 14
-            Lab.TextWrapped = true
-            Lab.TextXAlignment = Enum.TextXAlignment.Left
-            Lab.TextYAlignment = Enum.TextYAlignment.Top
-            
-            LabCorner.CornerRadius = UDim.new(0, 8)
-            LabCorner.Parent = Lab
-            
-            local Pad = Instance.new("UIPadding")
-            Pad.Parent = Lab
-            Pad.PaddingLeft = UDim.new(0, 10)
-            Pad.PaddingRight = UDim.new(0, 10)
-            Pad.PaddingTop = UDim.new(0, 10)
-            Pad.PaddingBottom = UDim.new(0, 10)
-            
-            Lab.AutomaticSize = Enum.AutomaticSize.Y
-            return Lab
-        end
-
-        function Elements:TextBox(text, placeholder, cb)
-            local BoxFrame = Instance.new("Frame")
-            local BoxCorner = Instance.new("UICorner")
-            local BoxStroke = Instance.new("UIStroke")
-            local BoxTitle = Instance.new("TextLabel")
-            local BoxInput = Instance.new("TextBox")
-            
-            BoxFrame.Parent = TabPage
-            BoxFrame.BackgroundColor3 = Settings.Element
-            BoxFrame.BackgroundTransparency = 0.2
-            BoxFrame.Size = UDim2.new(1, -5, 0, 50)
-            
-            BoxCorner.CornerRadius = UDim.new(0, 8)
-            BoxCorner.Parent = BoxFrame
-            
-            BoxStroke.Parent = BoxFrame
-            BoxStroke.Color = Color3.fromRGB(40, 40, 50)
-            BoxStroke.Thickness = 1
-            BoxStroke.Transparency = 0.5
-            
-            BoxTitle.Parent = BoxFrame
-            BoxTitle.BackgroundTransparency = 1
-            BoxTitle.Position = UDim2.new(0, 15, 0, 5)
-            BoxTitle.Size = UDim2.new(1, -30, 0, 20)
-            BoxTitle.Font = Enum.Font.GothamMedium
-            BoxTitle.Text = text
-            BoxTitle.TextColor3 = Settings.Text
-            BoxTitle.TextSize = 14
-            BoxTitle.TextXAlignment = Enum.TextXAlignment.Left
-            
-            BoxInput.Parent = BoxFrame
-            BoxInput.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-            BoxInput.BackgroundTransparency = 0
-            BoxInput.Position = UDim2.new(0, 15, 0, 28)
-            BoxInput.Size = UDim2.new(1, -30, 0, 18)
-            BoxInput.Font = Enum.Font.Gotham
-            BoxInput.PlaceholderText = placeholder or "Input..."
-            BoxInput.Text = ""
-            BoxInput.TextColor3 = Settings.Text
-            BoxInput.PlaceholderColor3 = Settings.TextDark
-            BoxInput.TextSize = 13
-            BoxInput.TextXAlignment = Enum.TextXAlignment.Left
-            
-            local InputCorner = Instance.new("UICorner")
-            InputCorner.CornerRadius = UDim.new(0, 4)
-            InputCorner.Parent = BoxInput
-            
-            BoxInput.FocusLost:Connect(function()
-                pcall(cb, BoxInput.Text)
-            end)
-        end
-
-        function Elements:Dropdown(text, list, cb)
-            local DropOpen = false
-            local DropFrame = Instance.new("Frame")
-            local DropCorner = Instance.new("UICorner")
-            local DropStroke = Instance.new("UIStroke")
-            local DropBtn = Instance.new("TextButton")
-            local DropTitle = Instance.new("TextLabel")
-            local DropIcon = Instance.new("ImageLabel")
-            local DropSelected = Instance.new("TextLabel")
-            local DropScroll = Instance.new("ScrollingFrame")
-            local DropListLayout = Instance.new("UIListLayout")
-            local DropPadding = Instance.new("UIPadding")
-            
-            DropFrame.Parent = TabPage
-            DropFrame.BackgroundColor3 = Settings.Element
-            DropFrame.BackgroundTransparency = 0.2
-            DropFrame.Size = UDim2.new(1, -5, 0, 42)
-            DropFrame.ClipsDescendants = true
-            DropFrame.ZIndex = 20
-            
-            DropCorner.CornerRadius = UDim.new(0, 8)
-            DropCorner.Parent = DropFrame
-            
-            DropStroke.Parent = DropFrame
-            DropStroke.Color = Color3.fromRGB(40, 40, 50)
-            DropStroke.Thickness = 1
-            DropStroke.Transparency = 0.5
-            
-            DropBtn.Parent = DropFrame
-            DropBtn.BackgroundTransparency = 1
-            DropBtn.Size = UDim2.new(1, 0, 0, 42)
-            DropBtn.Text = ""
-            DropBtn.ZIndex = 21
-            
-            DropTitle.Parent = DropBtn
-            DropTitle.BackgroundTransparency = 1
-            DropTitle.Position = UDim2.new(0, 15, 0, 0)
-            DropTitle.Size = UDim2.new(1, -30, 1, 0)
-            DropTitle.Font = Enum.Font.GothamMedium
-            DropTitle.Text = text
-            DropTitle.TextColor3 = Settings.Text
-            DropTitle.TextSize = 14
-            DropTitle.TextXAlignment = Enum.TextXAlignment.Left
-            DropTitle.ZIndex = 21
-            
-            DropIcon.Parent = DropBtn
-            DropIcon.BackgroundTransparency = 1
-            DropIcon.Position = UDim2.new(1, -30, 0.5, -10)
-            DropIcon.Size = UDim2.new(0, 20, 0, 20)
-            DropIcon.Image = "rbxassetid://6031091004"
-            DropIcon.ImageColor3 = Settings.TextDark
-            DropIcon.ZIndex = 21
-            
-            DropSelected.Parent = DropBtn
-            DropSelected.BackgroundTransparency = 1
-            DropSelected.Position = UDim2.new(1, -150, 0, 0)
-            DropSelected.Size = UDim2.new(0, 115, 1, 0)
-            DropSelected.Font = Enum.Font.Gotham
-            DropSelected.Text = "..."
-            DropSelected.TextColor3 = Settings.Accent
-            DropSelected.TextSize = 13
-            DropSelected.TextXAlignment = Enum.TextXAlignment.Right
-            DropSelected.ZIndex = 21
-            
-            DropScroll.Parent = DropFrame
-            DropScroll.BackgroundTransparency = 1
-            DropScroll.Position = UDim2.new(0, 0, 0, 45)
-            DropScroll.Size = UDim2.new(1, 0, 1, -45)
-            DropScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-            DropScroll.ScrollBarThickness = 2
-            DropScroll.ZIndex = 22
-            
-            DropListLayout.Parent = DropScroll
-            DropListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-            DropListLayout.Padding = UDim.new(0, 5)
-            
-            DropPadding.Parent = DropScroll
-            DropPadding.PaddingLeft = UDim.new(0, 10)
-            DropPadding.PaddingRight = UDim.new(0, 10)
-            
-            local function RefreshList(newlist)
-                for _, v in pairs(DropScroll:GetChildren()) do
-                    if v:IsA("TextButton") then v:Destroy() end
-                end
-                
-                for _, v in pairs(newlist) do
-                    local Item = Instance.new("TextButton")
-                    local ItemCorner = Instance.new("UICorner")
-                    
-                    Item.Parent = DropScroll
-                    Item.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-                    Item.Size = UDim2.new(1, 0, 0, 30)
-                    Item.AutoButtonColor = false
-                    Item.Font = Enum.Font.Gotham
-                    Item.Text = v
-                    Item.TextColor3 = Settings.TextDark
-                    Item.TextSize = 13
-                    Item.ZIndex = 23
-                    
-                    ItemCorner.CornerRadius = UDim.new(0, 6)
-                    ItemCorner.Parent = Item
-                    
-                    Item.MouseButton1Click:Connect(function()
-                        DropSelected.Text = v
-                        pcall(cb, v)
-                        DropOpen = false
-                        Tween(DropFrame, {Size = UDim2.new(1, -5, 0, 42)}, 0.2)
-                        Tween(DropIcon, {Rotation = 0}, 0.2)
-                    end)
-                end
-                DropScroll.CanvasSize = UDim2.new(0, 0, 0, DropListLayout.AbsoluteContentSize.Y + 10)
-            end
-            
-            RefreshList(list)
-            
-            DropBtn.MouseButton1Click:Connect(function()
-                DropOpen = not DropOpen
-                if DropOpen then
-                    Tween(DropFrame, {Size = UDim2.new(1, -5, 0, 150)}, 0.2)
-                    Tween(DropIcon, {Rotation = 180}, 0.2)
-                else
-                    Tween(DropFrame, {Size = UDim2.new(1, -5, 0, 42)}, 0.2)
-                    Tween(DropIcon, {Rotation = 0}, 0.2)
-                end
-            end)
-            
-            return {
-                Refresh = function(l)
-                    RefreshList(l)
-                end
-            }
-        end
-
-        return Elements
-    end
-    return Window
-end
+local TiRex = loadstring(game:HttpGet("https://raw.githubusercontent.com/nathanathan69420-pixel/TiRex-Hub/refs/heads/main/Library.lua"))()
 
 local Hub = TiRex:Window("TiRex Hub")
 local Home = Hub:Tab("🏠 | Home", "")
 local Move = Hub:Tab("⚡ | Movement", "")
 local Sett = Hub:Tab("⚙️ | Settings", "")
 
-local StatsFile = "TiRex_Stats.json"
-local RunCount = 0
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+local LocalPlayer = Players.LocalPlayer
 
-if isfile and readfile and writefile then
-    if isfile(StatsFile) then
-        local success, data = pcall(function() 
-            return game:GetService("HttpService"):JSONDecode(readfile(StatsFile)) 
-        end)
-        if success and data and data.Runs then
-            RunCount = data.Runs
+local function FullCleanup()
+    pcall(function() RunService:UnbindFromRenderStep("TiRex_Fly") end)
+    pcall(function() RunService:UnbindFromRenderStep("TiRex_Speed") end)
+    pcall(function() RunService:UnbindFromRenderStep("TiRex_Jump") end)
+    pcall(function() RunService:UnbindFromRenderStep("TiRex_Noclip") end)
+    
+    getgenv().SpeedEnabled = false
+    getgenv().JumpEnabled = false
+    getgenv().FlyEnabled = false
+    getgenv().Noclip = false
+    getgenv().InfJump = false
+    
+    local Char = LocalPlayer.Character
+    if Char then
+        if Char:FindFirstChild("Humanoid") then
+            Char.Humanoid.PlatformStand = false
+            Char.Humanoid.WalkSpeed = 16
+            Char.Humanoid.JumpPower = 50
+        end
+        if Char:FindFirstChild("HumanoidRootPart") then
+            Char.HumanoidRootPart.Velocity = Vector3.zero
+        end
+        for _, v in pairs(Char:GetDescendants()) do
+            if v:IsA("BasePart") then v.CanCollide = true end
         end
     end
-    RunCount = RunCount + 1
-    writefile(StatsFile, game:GetService("HttpService"):JSONEncode({Runs = RunCount}))
-else
-    RunCount = 1
 end
 
-local WelcomeLabel = Home:Label("Initializing Stats...")
-local User = LocalPlayer.Name
-local Display = LocalPlayer.DisplayName
+local StatsFile = "TiRex_Stats.json"
+local RunCount = 1
+if isfile and readfile and writefile then
+    if isfile(StatsFile) then
+        local s, d = pcall(function() return HttpService:JSONDecode(readfile(StatsFile)) end)
+        if s and d and d.Runs then RunCount = d.Runs + 1 end
+    end
+    writefile(StatsFile, HttpService:JSONEncode({Runs = RunCount}))
+end
 
+local WelcomeLabel = Home:Label("Stats...")
 task.spawn(function()
     while true do
-        local TimeString = os.date("%I:%M %p %m/%d/%Y")
         WelcomeLabel.Text = string.format(
-            "Welcome to TiRex Hub, @%s(%s)!\n\nYou have ran TiRex Hub %d times.\n\nThe time is: %s",
-            User,
-            Display,
-            RunCount,
-            TimeString
+            "Welcome, @%s!\nRuns: %d\nTime: %s",
+            LocalPlayer.Name, RunCount, os.date("%I:%M %p %m/%d/%Y")
         )
         task.wait(1)
     end
 end)
 
 Home:Button("Destroy GUI", function()
+    FullCleanup()
     if TiRex.ActiveInstance then
         local main = TiRex.ActiveInstance:FindFirstChild("Main")
         if main then
-            local tween = TweenService:Create(main, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
-            tween:Play()
-            tween.Completed:Wait()
+            game:GetService("TweenService"):Create(main, TweenInfo.new(0.5), {Size = UDim2.new(0,0,0,0)}):Play()
+            task.wait(0.5)
         end
         TiRex.ActiveInstance:Destroy()
     end
@@ -1016,168 +119,142 @@ end)
 local SpeedVal = 16
 Move:Toggle("Speed Hack", false, function(s)
     getgenv().SpeedEnabled = s
-    while getgenv().SpeedEnabled do
-        game:GetService("RunService").Heartbeat:Wait()
-        if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
-             game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = SpeedVal
-        end
-    end
-    if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
+    if s then
+        RunService:BindToRenderStep("TiRex_Speed", 100, function()
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                LocalPlayer.Character.Humanoid.WalkSpeed = SpeedVal
+            end
+        end)
+    else
+        RunService:UnbindFromRenderStep("TiRex_Speed")
+        if LocalPlayer.Character then LocalPlayer.Character.Humanoid.WalkSpeed = 16 end
     end
 end)
 
-Move:Slider("Speed Amount", 16, 100, 16, function(v)
-    SpeedVal = v
-end)
+Move:Slider("Speed Amount", 16, 100, 16, function(v) SpeedVal = v end)
 
 local JumpVal = 50
 Move:Toggle("JumpPower", false, function(s)
     getgenv().JumpEnabled = s
-    while getgenv().JumpEnabled do
-         game:GetService("RunService").Heartbeat:Wait()
-         if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
-             game.Players.LocalPlayer.Character.Humanoid.JumpPower = JumpVal
-         end
-    end
-    if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
-        game.Players.LocalPlayer.Character.Humanoid.JumpPower = 50
+    if s then
+        RunService:BindToRenderStep("TiRex_Jump", 100, function()
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                LocalPlayer.Character.Humanoid.JumpPower = JumpVal
+            end
+        end)
+    else
+        RunService:UnbindFromRenderStep("TiRex_Jump")
+        if LocalPlayer.Character then LocalPlayer.Character.Humanoid.JumpPower = 50 end
     end
 end)
 
-Move:Slider("Jump Amount", 50, 500, 50, function(v)
-    JumpVal = v
-end)
-
-Move:Toggle("Infinite Jump", false, function(s)
-    getgenv().InfJump = s
-end)
+Move:Slider("Jump Amount", 50, 500, 50, function(v) JumpVal = v end)
 
 Move:Toggle("Noclip", false, function(s)
     getgenv().Noclip = s
     if s then
-        task.spawn(function()
-            while getgenv().Noclip do
-                game:GetService("RunService").Stepped:Wait()
-                if game.Players.LocalPlayer.Character then
-                    for _, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-                        if v:IsA("BasePart") and v.CanCollide then
-                            v.CanCollide = false
-                        end
-                    end
+        RunService:BindToRenderStep("TiRex_Noclip", 100, function()
+            if LocalPlayer.Character then
+                for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
+                    if v:IsA("BasePart") and v.CanCollide then v.CanCollide = false end
                 end
             end
         end)
+    else
+        RunService:UnbindFromRenderStep("TiRex_Noclip")
+    end
+end)
+
+Move:Toggle("Infinite Jump", false, function(s) getgenv().InfJump = s end)
+UserInputService.JumpRequest:Connect(function()
+    if getgenv().InfJump and LocalPlayer.Character then
+        LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):ChangeState("Jumping")
     end
 end)
 
 local FlySpeed = 16
 Move:Toggle("Fly (Mobile/PC)", false, function(s)
     getgenv().FlyEnabled = s
-    local LocalPlayer = game:GetService("Players").LocalPlayer
-    
     if s then
-        local Char = LocalPlayer.Character
-        if Char and Char:FindFirstChild("HumanoidRootPart") and Char:FindFirstChild("Humanoid") then
-            local HRP = Char.HumanoidRootPart
-            local Hum = Char.Humanoid
-            
-            task.spawn(function()
-                while getgenv().FlyEnabled and Char.Parent do
-                    local Delta = game:GetService("RunService").RenderStepped:Wait()
-                    local Cam = workspace.CurrentCamera
-                    local Move = Hum.MoveDirection
-                    
-                    Hum.PlatformStand = true
-                    HRP.Velocity = Vector3.zero
-                    HRP.AssemblyLinearVelocity = Vector3.zero
-                    
-                    HRP.CFrame = CFrame.new(HRP.Position, HRP.Position + Cam.CFrame.LookVector)
-                    
-                    if Move.Magnitude > 0 then
-                        local FlatLook = (Cam.CFrame.LookVector * Vector3.new(1,0,1)).Unit
-                        local Dot = 0
-                        if FlatLook.Magnitude > 0 then
-                            Dot = Move.Unit:Dot(FlatLook)
-                        end
-                        
-                        local FinalMove = Vector3.new(Move.X, 0, Move.Z)
-                        
-                        if math.abs(Dot) > 0.1 then
-                            FinalMove = FinalMove + Vector3.new(0, Cam.CFrame.LookVector.Y * Dot, 0)
-                        end
-                        
-                        HRP.CFrame = HRP.CFrame + (FinalMove * FlySpeed * Delta * 5)
-                    end
+        RunService:BindToRenderStep("TiRex_Fly", 100, function(Delta)
+            local Char = LocalPlayer.Character
+            if Char and Char:FindFirstChild("HumanoidRootPart") and Char:FindFirstChild("Humanoid") then
+                local HRP = Char.HumanoidRootPart
+                local Hum = Char.Humanoid
+                local Cam = workspace.CurrentCamera
+                
+                Hum.PlatformStand = true
+                HRP.Velocity = Vector3.zero
+                HRP.AssemblyLinearVelocity = Vector3.zero
+                
+                local MoveDir = Hum.MoveDirection
+                local LookVec = Cam.CFrame.LookVector
+                
+                HRP.CFrame = CFrame.new(HRP.Position, HRP.Position + LookVec)
+                
+                if MoveDir.Magnitude > 0 then
+                    HRP.CFrame = HRP.CFrame + (MoveDir * FlySpeed * Delta * 5)
                 end
-                if Hum then Hum.PlatformStand = false end
-            end)
+            end
+        end)
+    else
+        RunService:UnbindFromRenderStep("TiRex_Fly")
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.PlatformStand = false
+            LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.zero
         end
     end
 end)
 
-Move:Slider("Fly Speed", 16, 100, 16, function(v)
-    FlySpeed = v
-end)
-
-game:GetService("UserInputService").JumpRequest:Connect(function()
-    if getgenv().InfJump and LocalPlayer.Character then
-        LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):ChangeState("Jumping")
-    end
-end)
+Move:Slider("Fly Speed", 16, 100, 16, function(v) FlySpeed = v end)
 
 Sett:Button("Rejoin Server", function()
-    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game.Players.LocalPlayer)
+    TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
 end)
 
 Sett:Button("Server Hop", function()
     local PlaceID = game.PlaceId
     local AllIDs = {}
-    local found = false
     local function Hop()
-        local site = game.HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. PlaceID .. "/servers/Public?sortOrder=Asc&limit=100"))
+        local site = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. PlaceID .. "/servers/Public?sortOrder=Asc&limit=100"))
         for i, v in pairs(site.data) do
-            if v.playing ~= v.maxPlayers then
+            if v.playing ~= v.maxPlayers and v.id ~= game.JobId then
                 table.insert(AllIDs, v.id)
             end
         end
         if #AllIDs > 0 then
-            game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, AllIDs[math.random(1, #AllIDs)], LocalPlayer)
-            found = true
+            TeleportService:TeleportToPlaceInstance(PlaceID, AllIDs[math.random(1, #AllIDs)], LocalPlayer)
+        else
+            Hop()
         end
     end
-    if not found then
-        Hop()
-    end
+    Hop()
 end)
 
 local ConfigList = {}
 local SelectedConfig = ""
 local ConfigName = ""
+local Flags = {} 
+
+if not isfolder("TiRex") then makefolder("TiRex") end
+if not isfolder("TiRex/Configs") then makefolder("TiRex/Configs") end
 
 local function RefreshConfigs()
     ConfigList = {}
     if listfiles then
         for _, v in pairs(listfiles("TiRex/Configs")) do
-            table.insert(ConfigList, v:gsub("TiRex/Configs\\", ""):gsub("TiRex/Configs/", ""):gsub(".json", ""))
+            table.insert(ConfigList, v:match("([^/]+)$"):gsub(".json", ""))
         end
     end
 end
-
 RefreshConfigs()
 
-local Drop = Sett:Dropdown("Select Config", ConfigList, function(v)
-    SelectedConfig = v
-end)
-
-Sett:TextBox("Config Name Here..", "Type name...", function(v)
-    ConfigName = v
-end)
+local Drop = Sett:Dropdown("Select Config", ConfigList, function(v) SelectedConfig = v end)
+Sett:TextBox("Config Name...", "Name", function(v) ConfigName = v end)
 
 Sett:Button("Create Config", function()
     if ConfigName ~= "" then
-        local Data = HttpService:JSONEncode(Flags)
-        writefile("TiRex/Configs/" .. ConfigName .. ".json", Data)
+        writefile("TiRex/Configs/" .. ConfigName .. ".json", HttpService:JSONEncode(Flags))
         RefreshConfigs()
         Drop.Refresh(ConfigList)
     end
@@ -1185,12 +262,6 @@ end)
 
 Sett:Button("Load Config", function()
     if SelectedConfig ~= "" and isfile("TiRex/Configs/" .. SelectedConfig .. ".json") then
-        local Data = readfile("TiRex/Configs/" .. SelectedConfig .. ".json")
-        local Table = HttpService:JSONDecode(Data)
-        for i, v in pairs(Table) do
-            if ElementMap[i] then
-                ElementMap[i].Set(v)
-            end
-        end
+        local Data = HttpService:JSONDecode(readfile("TiRex/Configs/" .. SelectedConfig .. ".json"))
     end
 end)
