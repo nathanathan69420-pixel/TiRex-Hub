@@ -219,7 +219,7 @@ function TiRex:Window(name)
     MiniToggle.AutoButtonColor = false
     MiniToggle.ZIndex = 10
     -- Using rbxthumb to force texture load for Decal ID
-    MiniToggle.Image = "rbxthumb://type=Asset&id=133819129580916&w=150&h=150"
+    MiniToggle.Image = "rbxassetid://133819129580916"
     
     MiniCorner.CornerRadius = UDim.new(0, 10)
     MiniCorner.Parent = MiniToggle
